@@ -1131,10 +1131,10 @@ void EInkDisplay::displayGrayBuffer(const bool turnOffScreen) {
   // activate the custom LUT for grayscale rendering and refresh
   setCustomLUT(true, lut_grayscale);
 #if defined(BOARD_ESP32_S3_EPAPER_397)
-  // SSD1677: FAST partial after HALF/FULL corrupts the next page; use full BW+RED write + full refresh.
-  setRamArea(0, 0, displayWidth, displayHeight);
-  writeRamBuffer(CMD_WRITE_RAM_BW, frameBuffer, bufferSize);
-  writeRamBuffer(CMD_WRITE_RAM_RED, frameBuffer, bufferSize);
+  // Keep the two planes that copyGrayscaleLsbBuffers()/copyGrayscaleMsbBuffers() already placed in
+  // BW RAM (0x24) and RED RAM (0x26).  Writing frameBuffer into both banks makes LSB == MSB for
+  // every pixel, which leaves only the 00/11 combinations alive and collapses 4-level gray to
+  // black/white.  Full refresh only - a FAST partial after HALF/FULL corrupts the next page here.
   refreshDisplay(FULL_REFRESH, turnOffScreen);
 #else
   refreshDisplay(FAST_REFRESH, turnOffScreen);
