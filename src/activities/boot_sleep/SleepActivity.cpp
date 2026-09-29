@@ -42,6 +42,14 @@ void SleepActivity::onEnter() {
   if (render397PicturesSleepScreen(_shutdownWallpaper)) {
     return;
   }
+  // No picture wallpaper on the card: fall back to the BMP sleep screen (/sleep.bmp, /.sleep/,
+  // /sleep/).  That path is the only one left on this board which can render 2-bit gray, because
+  // the sleep-screen mode setting is hidden here (settingHiddenOnEpaper397) and excluded from the
+  // JSON loader, so SETTINGS.sleepScreen stays at its default DARK and the switch below never
+  // reaches CUSTOM.
+  if (Storage.exists("/sleep.bmp") || Storage.exists("/.sleep") || Storage.exists("/sleep")) {
+    return renderCustomSleepScreen();
+  }
 #endif
 
   // Show popup with reader orientation only when going to sleep from reader
